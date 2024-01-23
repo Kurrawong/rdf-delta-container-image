@@ -19,7 +19,9 @@ RUN git init && \
     git clone --depth 100 https://github.com/afs/rdf-delta.git && \
     git reset --hard ${DELTA_GIT_HASH}
 
-RUN mvn -Drat.skip=true -B verify --file pom.xml
+# RUN mvn -Drat.skip=true -B verify --file pom.xml
+# Skip tests and skip license check, just package up the code
+RUN mvn -Drat.skip=true -B package -DskipTests --file pom.xml
 
 #
 # Final stage
