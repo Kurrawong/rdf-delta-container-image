@@ -2,6 +2,8 @@
 
 ## Usage
 
+Pre-built container images are available at https://github.com/Kurrawong/rdf-delta-container-image/pkgs/container/rdf-delta.
+
 See [docker-compose.yml](docker-compose.yml) for general container setup.
 
 This repository builds and publishes the `rdf-delta` image with both the RDF Delta server and Fuseki with delta patch log sync enabled.
