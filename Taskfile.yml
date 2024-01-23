@@ -1,0 +1,21 @@
+# https://taskfile.dev
+
+version: "3"
+
+tasks:
+  down:
+    cmd: docker compose --profile stack down
+
+  down:clean:
+    desc: Tear down stack and also remove named volumes
+    cmd: docker compose --profile stack down -v
+
+  build:
+    cmd: docker compose --profile stack --profile loader build
+
+  up:
+    cmd: docker compose --profile stack up -d
+
+  load:
+    desc: Load data.ttl as a patch update
+    cmd: docker compose run --rm loader
