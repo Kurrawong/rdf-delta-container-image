@@ -6,7 +6,7 @@ on:
       - published
 
 env:
-  IMAGE_NAME: ghcr.io/kurrawong/rdf-delta-container-image
+  IMAGE_NAME: ghcr.io/kurrawong/rdf-delta
 
 jobs:
   build:
