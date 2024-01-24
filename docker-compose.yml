@@ -22,7 +22,6 @@ services:
       - 3030:3030
     volumes:
       - fuseki_data:/fuseki
-      - ./config.ttl:/opt/rdf-delta/config.ttl
     command: ["/bin/bash", "-c", "/opt/rdf-delta/fuseki-entrypoint.sh"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://rdf-delta-server:1066"]
@@ -43,7 +42,6 @@ services:
       - stack
     volumes:
       - fuseki2_data:/fuseki
-      - ./config.ttl:/opt/rdf-delta/config.ttl
     command: /bin/bash -c /opt/rdf-delta/fuseki-entrypoint.sh
     healthcheck:
       test: ["CMD", "curl", "-f", "http://rdf-delta-server:1066"]
