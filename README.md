@@ -118,31 +118,9 @@ http://.../{shortName}/
 
 ### Creating Patch Logs
 
-When creating new patch logs, a downstream client will always need to ask the RDF Delta Server for the latest patch id in order to create and send a valid patch log. According to the documentation, a request to `/ds/current` should provide that, but instead we are getting an unexpected response. Hopefully, we get a reply on [GitHub](https://github.com/afs/rdf-delta/discussions/270) on how to formulate the request correctly.
+When creating new patch logs, a downstream client will always need to ask the RDF Delta Server for the latest patch id in order to create and send a valid patch log. 
 
-The current workaround to get the latest patch id is to send a bogus `POST` request by sending an empty patch log with a generated version 4 UUID.
-
-```turtle
-H id <uuid:a563c698-f911-41b1-9c06-3cc7ce13bbda> .
-```
-
-The server will respond with a `400` with the following body in JSON.
-
-```json
-{
-  "error": "patch-conflict",
-  "log_info": {
-    "id": "id:85eec0a0-3c89-4669-ad98-ab002b30d649",
-    "name": "ds",
-    "uri": "delta:ds",
-    "min_version": 1,
-    "max_version": 1,
-    "latest": "id:8251fdfa-46a1-427b-871c-0659a2da439c"
-  }
-}
-```
-
-The properties of interest within `log_info`:
+Use the [rdf-delta-python](https://github.com/Kurrawong/rdf-delta-python) `DeltaClient` class and its `describe_log` method to retrieve the version information.
 
 - `min_version` - the first patch log _version_
 - `max_version` - the latest patch log _version_
