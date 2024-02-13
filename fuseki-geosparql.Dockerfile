@@ -3,7 +3,7 @@
 #
 FROM alpine:3 AS downloader
 
-ARG COMPOUND_NAMING_VERSION=0.1.1
+ARG COMPOUND_NAMING_VERSION=0.3.0
 
 RUN mkdir -p /opt/fuseki
 RUN wget -O /opt/fuseki/compoundnaming.jar https://github.com/Kurrawong/jena-compound-naming/releases/download/${COMPOUND_NAMING_VERSION}/compoundnaming-${COMPOUND_NAMING_VERSION}.jar
