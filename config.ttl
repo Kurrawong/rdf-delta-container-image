@@ -9,6 +9,7 @@
 @prefix text:    <http://jena.apache.org/text#> .
 @prefix geosparql: <http://jena.apache.org/geosparql#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sdo: <https://schema.org/> .
 
 [] rdf:type fuseki:Server ;
    ja:loadClass
