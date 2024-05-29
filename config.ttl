@@ -86,6 +86,8 @@
           text:predicate rdfs:label ]
         [ text:field "prefLabel" ;
           text:predicate skos:prefLabel ]
+        [ text:field "notation" ;
+          text:predicate skos:notation ]
         [ text:field "identifier" ;
           text:predicate sdo:identifier ]
     ) .
