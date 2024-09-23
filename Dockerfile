@@ -8,7 +8,8 @@ ARG COMPOUND_NAMING_VERSION=0.4.1
 FROM maven:3.9.6-amazoncorretto-17 AS builder
 
 RUN yum install -y \
-        git
+        git \
+        unzip
 
 WORKDIR /tmp/rdf-delta
 
@@ -22,6 +23,8 @@ RUN git init && \
 # RUN mvn -Drat.skip=true -B verify --file pom.xml
 # Skip tests and skip license check, just package up the code
 RUN mvn -Drat.skip=true -B package -DskipTests --file pom.xml
+
+RUN unzip /tmp/rdf-delta/rdf-delta-dist/target/*.zip
 
 #
 # Final stage
@@ -42,9 +45,11 @@ WORKDIR /opt/rdf-delta
 COPY config.ttl /opt/rdf-delta/config.ttl
 COPY entrypoint.sh .
 COPY fuseki-entrypoint.sh .
+RUN mkdir cli
 
 COPY --from=builder /tmp/rdf-delta/rdf-delta-server/target/rdf-delta-server-${DELTA_VERSION}.jar rdf-delta-server.jar
 COPY --from=builder /tmp/rdf-delta/rdf-delta-fuseki-server/target/rdf-delta-fuseki-server-${DELTA_VERSION}.jar rdf-delta-fuseki-server.jar
+COPY --from=builder /tmp/rdf-delta/rdf-delta-${DELTA_VERSION} cli
 
 RUN wget -O /opt/rdf-delta/compoundnaming.jar https://github.com/Kurrawong/jena-compound-naming/releases/download/${COMPOUND_NAMING_VERSION}/compoundnaming-${COMPOUND_NAMING_VERSION}.jar
 
