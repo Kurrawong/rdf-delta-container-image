@@ -1,11 +1,11 @@
 ARG DELTA_VERSION=2.0.0-SNAPSHOT
 ARG DELTA_GIT_HASH=eb2bc11e5deeb68b7ac92d310948fc685b357692
-ARG COMPOUND_NAMING_VERSION=0.4.1
+ARG COMPOUND_NAMING_VERSION=0.6.0
 
 #
 # Builder stage
 #
-FROM maven:3.9.6-amazoncorretto-17 AS builder
+FROM maven:3.9.6-amazoncorretto-21 AS builder
 
 RUN yum install -y \
         git \
@@ -29,7 +29,7 @@ RUN unzip /tmp/rdf-delta/rdf-delta-dist/target/*.zip
 #
 # Final stage
 #
-FROM amazoncorretto:17-alpine
+FROM amazoncorretto:21-alpine
 
 ARG DELTA_VERSION
 ARG COMPOUND_NAMING_VERSION
