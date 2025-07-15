@@ -1,0 +1,10 @@
+@prefix ex: <https://example.org/> .
+@prefix sdo: <https://schema.org/> .
+
+ex:graph {
+  ex:a 
+    a sdo:Thing ;
+    sdo:name "a thing" ;
+    sdo:description "test data to submit as a patch" ;
+  .
+}
