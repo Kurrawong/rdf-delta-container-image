@@ -1,6 +1,5 @@
 ARG DELTA_VERSION=2.0.0-SNAPSHOT
 ARG DELTA_GIT_HASH=ae3c6c8d94595c8285a01e6ca4f8ba3f3ac58c5d
-ARG COMPOUND_NAMING_VERSION=0.6.0
 
 #
 # Builder stage
@@ -32,7 +31,6 @@ RUN unzip /tmp/rdf-delta/rdf-delta-dist/target/*.zip
 FROM amazoncorretto:21-alpine
 
 ARG DELTA_VERSION
-ARG COMPOUND_NAMING_VERSION
 
 RUN apk update \
     && apk add --no-cache \
@@ -45,13 +43,9 @@ WORKDIR /opt/rdf-delta
 COPY config.ttl /opt/rdf-delta/config.ttl
 COPY entrypoint.sh .
 COPY fuseki-entrypoint.sh .
-RUN mkdir cli
 
 COPY --from=builder /tmp/rdf-delta/rdf-delta-server/target/rdf-delta-server-${DELTA_VERSION}.jar rdf-delta-server.jar
 COPY --from=builder /tmp/rdf-delta/rdf-delta-fuseki-server/target/rdf-delta-fuseki-server-${DELTA_VERSION}.jar rdf-delta-fuseki-server.jar
-COPY --from=builder /tmp/rdf-delta/rdf-delta-${DELTA_VERSION} cli
-
-RUN wget -O /opt/rdf-delta/compoundnaming.jar https://github.com/Kurrawong/jena-compound-naming/releases/download/${COMPOUND_NAMING_VERSION}/compoundnaming-${COMPOUND_NAMING_VERSION}.jar
 
 # Fuseki data directory for rdf delta
 RUN mkdir -p /fuseki/delta-zones
