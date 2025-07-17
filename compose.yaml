@@ -1,0 +1,40 @@
+services:
+  delta:
+    build:
+      context: .
+    ports:
+      - 1066:1066
+    networks:
+      - delta
+    healthcheck:
+      test: ["CMD", "curl", "http://localhost:1066"]
+      interval: 1s
+      timeout: 0.5s
+      retries: 3
+
+  fuseki1:
+    build:
+      context: .
+    ports:
+      - 3030:3030
+    networks:
+      - delta
+    command: ["/bin/bash", "-c", "/opt/rdf-delta/fuseki-entrypoint.sh"]
+    depends_on:
+      delta:
+        condition: service_healthy
+
+  fuseki2:
+    build:
+      context: .
+    ports:
+      - 3031:3030
+    networks:
+      - delta
+    command: ["/bin/bash", "-c", "/opt/rdf-delta/fuseki-entrypoint.sh"]
+    depends_on:
+      delta:
+        condition: service_healthy
+
+networks:
+  delta:

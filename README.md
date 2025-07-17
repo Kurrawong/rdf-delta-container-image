@@ -2,147 +2,104 @@
 
 ## Usage
 
-Pre-built container images are available at https://github.com/Kurrawong/rdf-delta-container-image/pkgs/container/rdf-delta.
+This repository builds and publishes the `rdf-delta` container image that has
+the RDF Delta server jar file and the delta patch log enabled Fuseki server jar.
 
-See [docker-compose.yml](docker-compose.yml) for general container setup.
+RDF delta is an RDF patch based server that enables high availability scenarios for
+Fuseki. See the [documentation](https://afs.github.io/rdf-delta/)
+and the [rdf-delta GitHub repository](https://github.com/afs/rdf-delta)
+for more information.
 
-This repository builds and publishes the `rdf-delta` image with both the RDF Delta server and Fuseki with delta patch log sync enabled.
+Pre-built container images are available at
+https://github.com/Kurrawong/rdf-delta-container-image/pkgs/container/rdf-delta.
 
-It also includes the Jena [Compound Naming functions](https://github.com/Kurrawong/jena-compound-naming).
+See the [compose.yml](compose.yml) for general container setup.
 
 ## Quickstart
 
-Run the following Taskfile commands or refer to the underlying docker compose commands in [Taskfile.yml](Taskfile.yml).
+Use [task](https://taskfile.dev) to run the commands in [Taskfile.yml](Taskfile.yml).
 
 ```shell
 # Start the services using docker compose
 task up
 
-# Load example data to RDF Delta server
+# Load the example data to RDF Delta server
 task load
 ```
 
-You will now have an RDF Delta server with the initial data loaded and two Fuseki servers synced to it.
-
-You will be able to send SPARQL queries to both Fuseki servers on `/ds`.
-
-> Send a query using the compound naming function `getComponents`.
-
-```sparql
-SELECT *
-WHERE {
-    BIND(<https://linked.data.gov.au/dataset/qld-addr/addr-obj-1837741> AS ?iri)
-    ?iri <java:ai.kurrawong.jena.compoundnaming.getComponents> (?componentType ?componentValue ?componentId) .
-}
-limit 10
-```
-
-You will get the following result:
-
-<details>
-    <summary>View result</summary>
-
-```
-{ "head": {
-    "vars": [ "iri" , "componentType" , "componentValue" , "componentId" ]
-  } ,
-  "results": {
-    "bindings": [
-      {
-        "iri": { "type": "uri" , "value": "https://linked.data.gov.au/dataset/qld-addr/addr-obj-1837741" } ,
-        "componentType": { "type": "uri" , "value": "https://w3id.org/profile/anz-address/AnzAddressComponentTypes/numberFirst" } ,
-        "componentValue": { "type": "literal" , "value": "2342" } ,
-        "componentId": { "type": "literal" , "value": "_:59d38bb385f7a08fa55521964314431f" }
-      } ,
-      {
-        "iri": { "type": "uri" , "value": "https://linked.data.gov.au/dataset/qld-addr/addr-obj-1837741" } ,
-        "componentType": { "type": "uri" , "value": "https://w3id.org/profile/anz-address/AnzAddressComponentTypes/locality" } ,
-        "componentValue": { "type": "literal" , "value": "MERMAID BEACH" } ,
-        "componentId": { "type": "literal" , "value": "<https://linked.data.gov.au/dataset/qld-addr/locality-MERMAID-BEACH>" }
-      } ,
-      {
-        "iri": { "type": "uri" , "value": "https://linked.data.gov.au/dataset/qld-addr/addr-obj-1837741" } ,
-        "componentType": { "type": "uri" , "value": "https://w3id.org/profile/anz-address/AnzAddressComponentTypes/numberLast" } ,
-        "componentValue": { "type": "literal" , "value": "2358" } ,
-        "componentId": { "type": "literal" , "value": "_:c7c27dea4b78b405697499bb607b6d98" }
-      } ,
-      {
-        "iri": { "type": "uri" , "value": "https://linked.data.gov.au/dataset/qld-addr/addr-obj-1837741" } ,
-        "componentType": { "type": "uri" , "value": "https://w3id.org/profile/anz-address/AnzAddressComponentTypes/flatTypeCode" } ,
-        "componentValue": { "type": "literal" , "value": "U" } ,
-        "componentId": { "type": "literal" , "value": "<https://example.com/flatTypeCode/U>" }
-      } ,
-      {
-        "iri": { "type": "uri" , "value": "https://linked.data.gov.au/dataset/qld-addr/addr-obj-1837741" } ,
-        "componentType": { "type": "uri" , "value": "https://w3id.org/profile/anz-address/AnzAddressComponentTypes/flatNumber" } ,
-        "componentValue": { "type": "literal" , "value": "14" } ,
-        "componentId": { "type": "literal" , "value": "_:7171660f119972efcc2ac158667912c1" }
-      } ,
-      {
-        "iri": { "type": "uri" , "value": "https://linked.data.gov.au/dataset/qld-addr/addr-obj-1837741" } ,
-        "componentType": { "type": "uri" , "value": "https://linked.data.gov.au/def/roads/ct/RoadType" } ,
-        "componentValue": { "type": "literal" , "value": "HWY (Y)" } ,
-        "componentId": { "type": "literal" , "value": "_:d431e7556a44be11a59e6162f8b017d1" }
-      } ,
-      {
-        "iri": { "type": "uri" , "value": "https://linked.data.gov.au/dataset/qld-addr/addr-obj-1837741" } ,
-        "componentType": { "type": "uri" , "value": "https://w3id.org/profile/anz-address/AnzAddressComponentTypes/levelTypeCode" } ,
-        "componentValue": { "type": "literal" , "value": "G" } ,
-        "componentId": { "type": "literal" , "value": "<https://linked.data.gov.au/dataset/gnaf/code/levelType/G>" }
-      } ,
-      {
-        "iri": { "type": "uri" , "value": "https://linked.data.gov.au/dataset/qld-addr/addr-obj-1837741" } ,
-        "componentType": { "type": "uri" , "value": "https://linked.data.gov.au/def/roads/ct/RoadName" } ,
-        "componentValue": { "type": "literal" , "value": "Gold Coast" } ,
-        "componentId": { "type": "literal" , "value": "_:1e00ba69154e028bd57c4d752bb67de0" }
-      }
-    ]
-  }
-}
-
-```
-
-</details>
+You will now have an RDF Delta server with the initial data loaded and two
+Fuseki servers synced to it.
 
 ## RDF Delta Server HTTP API
 
-The HTTP API is documented at [rdf-patch-logs.html](https://afs.github.io/rdf-delta/rdf-patch-logs.html).
+The HTTP API is documented at
+[rdf-patch-logs.html](https://afs.github.io/rdf-delta/rdf-patch-logs.html).
 
-```
-http://.../{shortName}/
-          /{shortName}/init -- "version 0" but dataset vs patch.
-          /{shortName}/current --  "highest version"
-          /{shortName}/patch/{version} -- all digits.
-          /{shortName}/patch/{id} -- A UUID string which has "-"
-```
+| Operation                          | Effect        |
+| ---------------------------------- | ------------- |
+| POST http://.../{shortName}/       | Append to log |
+| GET http://.../{shortName}/{id}    | Get a patch   |
+| GET http://.../{shortName}/version | Get a patch   |
 
 ### Creating Patch Logs
 
-When creating new patch logs, a downstream client will always need to ask the RDF Delta Server for the latest patch id in order to create and send a valid patch log. 
+When creating new patch logs, a downstream client will always need to ask
+the RDF Delta Server for the latest patch id in order to create and send a
+valid patch log.
 
-Use the [rdf-delta-python](https://github.com/Kurrawong/rdf-delta-python) `DeltaClient` class and its `describe_log` method to retrieve the version information.
+You can use the [rdf-delta-python](https://github.com/Kurrawong/rdf-delta-python)
+`DeltaClient` class and its `describe_log` method to retrieve the version information.
 
-- `min_version` - the first patch log _version_
-- `max_version` - the latest patch log _version_
-- `latest` - the latest patch log _id_
+The [load_patch.py](./load_patch.py) script shows how to get / submit patches using
+`rdflib` and `httpx`
 
-Now that the _id_ is known, we can construct a valid RDF patch and send a `POST` request to the RDF Delta Server at `/ds/`.
+Or you can also use any other http client to interact with the server.
 
-> Creating new patch log. Ensure a new UUID is generated for the id.
+For an example with `curl`
 
-```
-H id <uuid:0d82d6ab-823e-4c38-b96c-0765c2230563> .
-H prev <uuid:8251fdfa-46a1-427b-871c-0659a2da439c> .
+```bash
+# get the datasource id
+payload="
+  {
+    'opid': '',
+    'operation': 'describe_datasource',
+    'arg': {
+      'name': 'ds'
+    }
+  }
+"
+response=$(curl -s -X POST http://172.19.0.1:1066/$/rpc --data "$payload")
+echo "$response"
+datasource_id=$(echo "$response" | jq -r '.id')
+
+# get the latest patch log version
+payload="
+  {
+    'opid': '',
+    'operation': 'describe_log',
+    'arg': {
+      'datasource': '$datasource_id'
+    }
+  }
+"
+response=$(curl -s -X POST http://172.19.0.1:1066/$/rpc --data "$payload")
+echo "$response"
+latest=$(echo "$response" | jq -r '.latest')
+
+# send a new patch
+patch="H id <uuid:$(uuidgen)> ."
+if [ "$latest" ]; then
+  patch+="
+H prev <uu$latest> ."
+fi
+patch+="
 TX .
-A <http://example/SubClass> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/2002/07/owl#Class> .
+A <a> <b> <c> .
 TC .
+"
+echo "$patch"
+curl -s -X POST http://172.19.0.1:1066/ds \
+  --data "$patch" \
+  -H "Content-Type: application/rdf-patch"
 ```
 
-### Retrieving Patch Logs
-
-Patch logs can be retrieved by providing either the _version_ or the _id_ as a path parameter to `/ds/...`
-
-With the new patch log created above, we can retrieve it by making one of the following requests:
-
-- `/ds/2`
-- `/ds/0d82d6ab-823e-4c38-b96c-0765c2230563`
