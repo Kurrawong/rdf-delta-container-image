@@ -43,9 +43,11 @@ WORKDIR /opt/rdf-delta
 COPY config.ttl /opt/rdf-delta/config.ttl
 COPY entrypoint.sh .
 COPY fuseki-entrypoint.sh .
+RUN mkdir cli
 
 COPY --from=builder /tmp/rdf-delta/rdf-delta-server/target/rdf-delta-server-${DELTA_VERSION}.jar rdf-delta-server.jar
 COPY --from=builder /tmp/rdf-delta/rdf-delta-fuseki-server/target/rdf-delta-fuseki-server-${DELTA_VERSION}.jar rdf-delta-fuseki-server.jar
+COPY --from=builder /tmp/rdf-delta/rdf-delta-${DELTA_VERSION} cli
 
 # Fuseki data directory for rdf delta
 RUN mkdir -p /fuseki/delta-zones
