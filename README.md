@@ -1,5 +1,11 @@
 # RDF Delta Container Image
 
+> [!WARNING]
+> THIS IS A TEMPORARY BRANCH  
+> IT IS USED TO BUILD A PATCHED IMAGE THAT FIXES SOME VULNERABILITES THAT WILL SOON
+> BE FIXED IN MAIN, BY EXPLICITLY BUMPING THE VERSIONS OF SOME RDF-DELTA
+> DEPENDENCIES.
+
 ## Usage
 
 This repository builds and publishes the `rdf-delta` container image that has
