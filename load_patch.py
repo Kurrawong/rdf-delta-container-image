@@ -23,9 +23,7 @@ def main():
 
     print("converting data to rdf patch")
     patch = ds.serialize(format="patch", operation="add", header_prev=header_prev)
-    patch = patch.replace(
-        f"H prev <id:{header_prev}>", f"H prev <uuid:{header_prev}> ."
-    )
+    patch = patch.replace(f"H prev <{header_prev}>", f"H prev <uu{header_prev}> .")
 
     print("submitting patch log to rdf delta server")
     headers = {"Content-Type": "application/rdf-patch", "Accept": "application/json"}
