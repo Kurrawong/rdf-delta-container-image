@@ -103,3 +103,4 @@ curl -s -X POST http://172.19.0.1:1066/ds \
   -H "Content-Type: application/rdf-patch"
 ```
 
+# Querying the fuseki instances with SPARQL

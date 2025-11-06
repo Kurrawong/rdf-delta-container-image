@@ -1,10 +1,59 @@
 @prefix ex: <https://example.org/> .
 @prefix sdo: <https://schema.org/> .
+PREFIX addr:    <https://linked.data.gov.au/def/addr/>
+PREFIX geo:     <http://www.opengis.net/ont/geosparql#>
+PREFIX rdfs:    <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX schema:  <https://schema.org/>
+PREFIX dbo:     <http://dbpedia.org/ontology/>
 
 ex:graph {
-  ex:a 
+  ex:a
     a sdo:Thing ;
     sdo:name "a thing" ;
     sdo:description "test data to submit as a patch" ;
   .
+  <https://example.org/australia_boundingbox>
+        a geo:Geometry;
+        geo:asWKT "POLYGON((112.76 -10.23, 155.48 -10.23, 155.48 -44.28, 112.76 -44.28, 112.76 -10.23))"^^geo:wktLiteral .
+
+  <https://example.org/australia>
+          a                geo:Feature, dbo:Country;
+          rdfs:label       "A broad bounding box of Australia for testing purposes"@en;
+          geo:hasGeometry <https://example.org/australia_boundingbox> .
+
+  <https://linked.data.gov.au/dataset/qld-addr/geocode/891721>
+          a          geo:Geometry;
+          geo:asWKT  "POINT (151.82963099 -27.47602461)"^^geo:wktLiteral .
+
+  <https://linked.data.gov.au/dataset/qld-addr/address/2fd46078-88c0-5f30-b43e-d2908d9445b6>
+          a                geo:Feature, addr:Address;
+          rdfs:label       "10 Emmanulla Drive, Kingsthorpe, Queensland, Australia"@en;
+          geo:hasGeometry  <https://linked.data.gov.au/dataset/qld-addr/geocode/891721> .
+
+  <https://linked.data.gov.au/dataset/qld-addr/geocode/550300>
+          a          geo:Geometry;
+          geo:asWKT  "POINT (153.13401606 -27.62096167)"^^geo:wktLiteral .
+
+  <https://linked.data.gov.au/dataset/qld-addr/address/65cb1e52-fc1d-5dee-a2d2-ea7882d12c7e>
+          a                geo:Feature, addr:Address;
+          rdfs:label       "32 Barbaralla Drive, Springwood, Queensland, Australia"@en;
+          geo:hasGeometry  <https://linked.data.gov.au/dataset/qld-addr/geocode/550300> .
+
+  <https://linked.data.gov.au/dataset/qld-addr/geocode/1070138>
+          a          geo:Geometry;
+          geo:asWKT  "POINT (153.02902944 -27.52955817)"^^geo:wktLiteral .
+
+  <https://linked.data.gov.au/dataset/qld-addr/address/beb30200-2988-5c0a-942b-36cd2138805a>
+          a                geo:Feature, addr:Address;
+          rdfs:label       "32 Woodlea Street, Moorooka, Queensland, Australia"@en;
+          geo:hasGeometry  <https://linked.data.gov.au/dataset/qld-addr/geocode/1070138> .
+
+  <https://linked.data.gov.au/dataset/qld-addr/geocode/2816204>
+          a          geo:Geometry;
+          geo:asWKT  "POINT (153.33534399 -27.85467408)"^^geo:wktLiteral .
+
+  <https://linked.data.gov.au/dataset/qld-addr/address/7036d80a-ecb6-5ec9-86f0-5e5135934e04>
+          a                geo:Feature, addr:Address;
+          rdfs:label       "Unit 3506/4 Oaky Creek Road, Coomera, Queensland, Australia"@en;
+          geo:hasGeometry  <https://linked.data.gov.au/dataset/qld-addr/geocode/2816204> .
 }

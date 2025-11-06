@@ -1,10 +1,18 @@
 @prefix :        <#> .
+@prefix ja:     <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix rdf:    <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix delta:   <http://jena.apache.org/rdf-delta#> .
 @prefix fuseki:  <http://jena.apache.org/fuseki#> .
 @prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix tdb2:    <http://jena.apache.org/2016/tdb#> .
 @prefix text:    <http://jena.apache.org/text#> .
 @prefix sdo:     <https://schema.org/> .
+@prefix geosparql: <http://jena.apache.org/geosparql#> .
+
+text:TextDataset  rdfs:subClassOf  ja:RDFDataset .
+geosparql:geosparqlDataset  rdfs:subClassOf  ja:RDFDataset .
+geosparql:geosparqlDataset  rdfs:subClassOf  ja:Object .
+tdb2:DatasetTDB2  rdfs:subClassOf  ja:RDFDataset .
 
 [] a fuseki:Server .
 
@@ -13,10 +21,10 @@
     fuseki:dataset                     :delta_dataset;
     fuseki:name                        "ds" ;
     rdfs:label                         "TDB2 Dataset";
-    fuseki:serviceQuery                "query" ;
+    fuseki:serviceQuery                "query", "" , "sparql" ;
     fuseki:serviceUpdate               "update" ;
     fuseki:serviceUpload               "upload" ;
-    fuseki:serviceReadWriteGraphStore  "data" ;     
+    fuseki:serviceReadWriteGraphStore  "data" ;
     fuseki:serviceReadGraphStore       "get" ;
 .
 
@@ -31,9 +39,25 @@
 
 :text_dataset
     a             text:TextDataset ;
-    text:dataset  :tdb_dataset_readwrite ;
+    text:dataset  :spatial_dataset ;
     text:index    :indexLucene ;
 .
+
+:spatial_dataset a geosparql:geosparqlDataset ;
+  geosparql:spatialIndexFile "/fuseki/databases/ds/spatial.index";
+
+  # some GeoSPARQL settings. See https://jena.apache.org/documentation/geosparql/geosparql-fuseki.html
+  geosparql:inference            true ; # GeoSPARQL RDFS schema and inferencing (adds additional statements to the dataset)
+  geosparql:queryRewrite         true ; # Simplifies queries, relies on applyDefaultGeometry
+  geosparql:applyDefaultGeometry true ; # Makes the dataset less dependent on one serialization. Adds additional geo:hasSerialization statements to the dataset
+  geosparql:indexEnabled         true ; # Enable caching of re-usable data to improve query performance
+  geosparql:validateGeometryLiterals true ; # Logs warnings when adding invalid geometry
+
+  # 3 item lists: [Geometry Literal, Geometry Transform, Query Rewrite]
+  geosparql:indexSizes           "-1,-1,-1" ;       # Default - unlimited.
+  geosparql:indexExpires         "5000,5000,5000" ; # Default - time in milliseconds.
+
+  geosparql:dataset :tdb_dataset_readwrite .
 
 :tdb_dataset_readwrite
     a                       tdb2:DatasetTDB2;
@@ -43,10 +67,13 @@
 
 :indexLucene
     a                 text:TextIndexLucene ;
-    text:directory    "/fuseki/databases/ds" ;
+    text:directory <file:/fuseki/databases/ds/text_index> ;
     text:entityMap    :entMap ;
     text:analyzer     [ a text:StandardAnalyzer ] ;
     text:storeValues  true ;
+    text:queryAnalyzer [ a text:StandardAnalyzer ] ;
+    text:queryParser text:QueryParser ;
+    text:multilingualSupport true
 .
 
 :entMap
