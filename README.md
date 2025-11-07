@@ -115,3 +115,25 @@ Then run `docker compose up -d --build`.
 
 
 ## Querying the fuseki instances with SPARQL
+
+There is no UI included in the rdf-delta-fuseki-server, so querying is done using curl:
+
+```
+query=$(cat << EOF
+PREFIX addr:    <https://linked.data.gov.au/def/addr/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+
+SELECT DISTINCT ?address
+WHERE {
+  ?address a addr:Address .
+  <https://example.org/australia> geo:sfContains ?address .
+}
+
+# returns all 4 addresses in the test dataset
+EOF
+)
+
+
+curl -d query="$query" -d 'output=text' http://localhost:3031/ds
+```
