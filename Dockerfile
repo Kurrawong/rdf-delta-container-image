@@ -29,19 +29,20 @@ RUN <<EOF
       git fetch --depth 1 origin ${DELTA_GIT_HASH}:main && \
       git checkout main && \
       git reset --hard ${DELTA_GIT_HASH}
-  # Apply a dependency patch for GeoSPARQL support
+EOF
 
-  WORKDIR ${JENA_BUILD_DIR}/jena
-  COPY patches/enable-geosparql.diff .
-  RUN patch -p1 < enable-geosparql.diff
+# Apply a dependency patch for GeoSPARQL support
+COPY patches/enable-geosparql.diff .
+WORKDIR /tmp/rdf-delta/rdf-delta-fuseki-server
+RUN patch --verbose --ignore-whitespace pom.xml < ../enable-geosparql.diff
+WORKDIR /tmp/rdf-delta
 
-  # RUN mvn -Drat.skip=true -B verify --file pom.xml
-  # Skip tests and skip license check, just package up the code
-  mvn -Drat.skip=true -B package -DskipTests --file pom.xml
+# RUN mvn -Drat.skip=true -B verify --file pom.xml
+# Skip tests and skip license check, just package up the code
+RUN mvn -Drat.skip=true -B package -DskipTests --file pom.xml
 
   # unzip the distribution (has the cli commands in it)
-  unzip /tmp/rdf-delta/rdf-delta-dist/target/*.zip
-EOF
+RUN unzip /tmp/rdf-delta/rdf-delta-dist/target/*.zip
 
 #
 # Final stage
