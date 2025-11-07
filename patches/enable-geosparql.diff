@@ -1,5 +1,5 @@
 diff --git a/rdf-delta-fuseki-server/pom.xml b/rdf-delta-fuseki-server/pom.xml
-index ddbd0a15..76857451 100644
+index ddbd0a15..f1dc71c8 100644
 --- a/rdf-delta-fuseki-server/pom.xml
 +++ b/rdf-delta-fuseki-server/pom.xml
 @@ -3,15 +3,15 @@
@@ -30,7 +30,7 @@ index ddbd0a15..76857451 100644
 
    <properties>
      <automatic.module.name>org.seaborne.rdf_delta.fuseki_server</automatic.module.name>
-@@ -40,13 +40,13 @@
+@@ -40,17 +40,17 @@
        <groupId>org.seaborne.rdf-delta</groupId>
        <artifactId>rdf-delta-fuseki</artifactId>
        <version>2.0.0-SNAPSHOT</version>
@@ -47,6 +47,11 @@ index ddbd0a15..76857451 100644
 
      <dependency>
        <groupId>org.apache.jena</groupId>
+-      <artifactId>jena-fuseki-main</artifactId>
++      <artifactId>jena-fuseki-server</artifactId>
+     </dependency>
+
+     <dependency>
 @@ -64,6 +64,13 @@
        <artifactId>jena-text</artifactId>
      </dependency>
@@ -71,7 +76,7 @@ index ddbd0a15..76857451 100644
        <plugin>
          <groupId>org.apache.maven.plugins</groupId>
 diff --git a/rdf-delta-fuseki/pom.xml b/rdf-delta-fuseki/pom.xml
-index 3c5de6f0..ce90c1c3 100644
+index 3c5de6f0..fbad3da2 100644
 --- a/rdf-delta-fuseki/pom.xml
 +++ b/rdf-delta-fuseki/pom.xml
 @@ -3,15 +3,15 @@
@@ -102,7 +107,7 @@ index 3c5de6f0..ce90c1c3 100644
 
    <properties>
      <automatic.module.name>org.seaborne.rdf_delta.fuseki</automatic.module.name>
-@@ -38,7 +38,7 @@
+@@ -38,13 +38,13 @@
 
      <dependency>
        <groupId>org.seaborne.rdf-delta</groupId>
@@ -111,6 +116,13 @@ index 3c5de6f0..ce90c1c3 100644
        <version>2.0.0-SNAPSHOT</version>
      </dependency>
 
+     <dependency>
+       <groupId>org.apache.jena</groupId>
+-      <artifactId>jena-fuseki-main</artifactId>
++      <artifactId>jena-fuseki-server</artifactId>
+     </dependency>
+
+     <dependency>
 @@ -53,6 +53,12 @@
        <scope>test</scope>
      </dependency>

@@ -103,4 +103,15 @@ curl -s -X POST http://172.19.0.1:1066/ds \
   -H "Content-Type: application/rdf-patch"
 ```
 
-# Querying the fuseki instances with SPARQL
+## Rebuilding cached images
+
+To rebuild the images from scratch, you may need to delete any cached images (e.g., if the enable-geosparql.diff patch has changed, docker may not pick this up):
+
+```
+docker rmi -f $(docker images -aq)
+```
+
+Then run `docker compose up -d --build`.
+
+
+## Querying the fuseki instances with SPARQL
