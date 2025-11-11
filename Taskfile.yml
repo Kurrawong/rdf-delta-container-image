@@ -9,11 +9,15 @@ tasks:
 
   up:
     desc: start delta server and 2 fuseki servers as docker compose services
-    cmd: docker compose up -d
+    cmd: docker compose up -d --build
 
   load:
     desc: Load data.trig as a patch update
     cmd: uv run load_patch.py
+
+  query:
+    desc: Execute a set of queries against the databases
+    cmd: uv run query.py
 
   down:
     desc: down the docker services
