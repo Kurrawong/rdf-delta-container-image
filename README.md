@@ -165,3 +165,28 @@ EOF
 
 curl -d query="$query" -d 'output=text' http://localhost:3031/ds
 ```
+
+To test both spatial and text index together, run the following:
+
+```
+query=$(cat << EOF
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+PREFIX text: <http://jena.apache.org/text#>
+
+SELECT DISTINCT ?address ?literal
+WHERE {
+  BIND("POLYGON ((152.685242 -27.161808, 152.698975 -27.829361, 153.492737 -27.829361, 153.435059 -27.178912, 152.685242 -27.161808))"^^geo:wktLiteral AS ?polygon)
+  ?address geo:hasGeometry / geo:asWKT ?point ;
+           rdfs:label ?addressLabel .
+  FILTER(geof:sfWithin(?point, ?polygon))
+  (?address ?score ?literal) text:query ( "Drive" "highlight:" ) .
+}
+# returns
+# 1<https://linked.data.gov.au/dataset/qld-addr/address/65cb1e52-fc1d-5dee-a2d2-ea7882d12c7e> "32 Barbaralla ↦Drive↤, Springwood, Queensland, Australia"@en
+EOF
+)
+
+curl -d query="$query" -d 'output=text' http://localhost:3030/ds
+```
