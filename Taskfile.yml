@@ -11,6 +11,10 @@ tasks:
     desc: start delta server and 2 fuseki servers as docker compose services
     cmd: docker compose up -d --build
 
+  restart:
+    desc: Restart both fuseki servers
+    cmd: docker compose restart fuseki1 fuseki2
+
   load:
     desc: Load data.trig as a patch update
     cmd: uv run load_patch.py
@@ -22,4 +26,3 @@ tasks:
   down:
     desc: down the docker services
     cmd: docker compose down
-

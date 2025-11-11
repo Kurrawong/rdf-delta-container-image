@@ -29,7 +29,7 @@
     delta:patchlog                     "ds";
     delta:zone                         "/fuseki/delta-zones";
     delta:storage                      "external";
-    delta:dataset                      :geosparql_dataset ;
+    delta:dataset                      :text_dataset ;
 .
 
 :geosparql_dataset
@@ -43,12 +43,12 @@
     geosparql:srsUri                   <http://www.opengis.net/def/crs/OGC/1.3/CRS84> ;
     geosparql:indexSizes               "-1,-1,-1" ;
     geosparql:indexExpires             "5000,5000,5000" ;
-    geosparql:dataset                  :text_dataset ;
+    geosparql:dataset                  :tdb_dataset_readwrite ;
 .
 
 :text_dataset
     rdf:type                            text:TextDataset ;
-    text:dataset                       :tdb_dataset_readwrite ;
+    text:dataset                       :geosparql_dataset ;
     text:index                         :lucene_index ;
 .
 
@@ -64,12 +64,14 @@
 
 :lucene_index
     rdf:type                           text:TextIndexLucene ;
-    text:directory                     "/fuseki/databases/ds/lucene" ;
+    text:directory                     <file:/fuseki/databases/ds/text_index> ;
     text:entityMap                     :entity_map ;
     text:storeValues                   true ;
     text:analyzer [
         rdf:type text:StandardAnalyzer
     ] ;
+    text:queryAnalyzer [ a text:StandardAnalyzer ] ;
+    text:queryParser text:QueryParser ;
     text:multilingualSupport           true ;
     text:propLists (
         [
@@ -96,4 +98,3 @@
         [ text:field "sdo-description" ; text:predicate sdo:description ]
     ) ;
 .
-

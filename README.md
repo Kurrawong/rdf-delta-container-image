@@ -25,6 +25,9 @@ task up
 
 # Load the example data to RDF Delta server
 task load
+
+# restart to reload the indexes
+task restart
 ```
 
 You will now have an RDF Delta server with the initial data loaded and two
@@ -116,7 +119,11 @@ Then run `docker compose up -d --build`.
 
 ## Querying the fuseki instances with SPARQL
 
-There is no UI included in the rdf-delta-fuseki-server, so querying is done using curl:
+To easily test a few queries, run `task query`.
+
+Make sure the indexes are up to date by restarting the fuseki servers after the data was loaded.
+
+There is no UI included in the rdf-delta-fuseki-server, so querying manually is done using curl:
 
 ```
 query=$(cat << EOF
@@ -134,6 +141,27 @@ WHERE {
 EOF
 )
 
+
+curl -d query="$query" -d 'output=text' http://localhost:3030/ds
+```
+
+If this returns all 4 addresses in the test dataset, the spatial index is working.
+
+To test the Lucene text index, run the following:
+
+```
+query=$(cat << EOF
+PREFIX text: <http://jena.apache.org/text#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?uri ?label
+WHERE {
+  ?uri text:query 'Queensland' ;
+       rdfs:label ?label .
+}
+LIMIT 5
+# returns all 4 addresses in the test dataset
+EOF
+)
 
 curl -d query="$query" -d 'output=text' http://localhost:3031/ds
 ```
