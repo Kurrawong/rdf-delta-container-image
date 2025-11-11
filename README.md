@@ -25,6 +25,9 @@ task up
 
 # Load the example data to RDF Delta server
 task load
+
+# restart to reload the indexes
+task restart
 ```
 
 You will now have an RDF Delta server with the initial data loaded and two
@@ -103,3 +106,87 @@ curl -s -X POST http://172.19.0.1:1066/ds \
   -H "Content-Type: application/rdf-patch"
 ```
 
+## Rebuilding cached images
+
+To rebuild the images from scratch, you may need to delete any cached images (e.g., if the enable-geosparql.diff patch has changed, docker may not pick this up):
+
+```
+docker rmi -f $(docker images -aq)
+```
+
+Then run `docker compose up -d --build`.
+
+
+## Querying the fuseki instances with SPARQL
+
+To easily test a few queries, run `task query`.
+
+Make sure the indexes are up to date by restarting the fuseki servers after the data was loaded.
+
+There is no UI included in the rdf-delta-fuseki-server, so querying manually is done using curl:
+
+```
+query=$(cat << EOF
+PREFIX addr:    <https://linked.data.gov.au/def/addr/>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+
+SELECT DISTINCT ?address
+WHERE {
+  ?address a addr:Address .
+  <https://example.org/australia> geo:sfContains ?address .
+}
+
+# returns all 4 addresses in the test dataset
+EOF
+)
+
+
+curl -d query="$query" -d 'output=text' http://localhost:3030/ds
+```
+
+If this returns all 4 addresses in the test dataset, the spatial index is working.
+
+To test the Lucene text index, run the following:
+
+```
+query=$(cat << EOF
+PREFIX text: <http://jena.apache.org/text#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+SELECT ?uri ?label
+WHERE {
+  ?uri text:query 'Queensland' ;
+       rdfs:label ?label .
+}
+LIMIT 5
+# returns all 4 addresses in the test dataset
+EOF
+)
+
+curl -d query="$query" -d 'output=text' http://localhost:3031/ds
+```
+
+To test both spatial and text index together, run the following:
+
+```
+query=$(cat << EOF
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX geo: <http://www.opengis.net/ont/geosparql#>
+PREFIX geof: <http://www.opengis.net/def/function/geosparql/>
+PREFIX text: <http://jena.apache.org/text#>
+
+SELECT DISTINCT ?address ?literal
+WHERE {
+  BIND("POLYGON ((152.685242 -27.161808, 152.698975 -27.829361, 153.492737 -27.829361, 153.435059 -27.178912, 152.685242 -27.161808))"^^geo:wktLiteral AS ?polygon)
+  ?address geo:hasGeometry / geo:asWKT ?point ;
+           rdfs:label ?addressLabel .
+  FILTER(geof:sfWithin(?point, ?polygon))
+  (?address ?score ?literal) text:query ( "Drive" "highlight:" ) .
+}
+# returns
+# 1<https://linked.data.gov.au/dataset/qld-addr/address/65cb1e52-fc1d-5dee-a2d2-ea7882d12c7e> "32 Barbaralla ↦Drive↤, Springwood, Queensland, Australia"@en
+EOF
+)
+
+curl -d query="$query" -d 'output=text' http://localhost:3030/ds
+```

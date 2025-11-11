@@ -1,60 +1,100 @@
-@prefix :        <#> .
-@prefix delta:   <http://jena.apache.org/rdf-delta#> .
-@prefix fuseki:  <http://jena.apache.org/fuseki#> .
-@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
-@prefix tdb2:    <http://jena.apache.org/2016/tdb#> .
-@prefix text:    <http://jena.apache.org/text#> .
-@prefix sdo:     <https://schema.org/> .
+@prefix :          <#> .
+@prefix delta:     <http://jena.apache.org/rdf-delta#> .
+@prefix ex:        <https://example.org/> .
+@prefix fuseki:    <http://jena.apache.org/fuseki#> .
+@prefix geosparql: <http://jena.apache.org/geosparql#> .
+@prefix ja:        <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix rdf:       <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:      <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix sdo:       <https://schema.org> .
+@prefix tdb2:      <http://jena.apache.org/2016/tdb#> .
+@prefix text:      <http://jena.apache.org/text#> .
 
-[] a fuseki:Server .
-
-:service_tdb_all
-    a                                  fuseki:Service;
-    fuseki:dataset                     :delta_dataset;
+:service
+    rdf:type                           fuseki:Service ;
     fuseki:name                        "ds" ;
-    rdfs:label                         "TDB2 Dataset";
+    fuseki:serviceQuery                "sparql" ;
     fuseki:serviceQuery                "query" ;
     fuseki:serviceUpdate               "update" ;
     fuseki:serviceUpload               "upload" ;
-    fuseki:serviceReadWriteGraphStore  "data" ;     
+    fuseki:serviceReadWriteGraphStore  "data" ;
     fuseki:serviceReadGraphStore       "get" ;
+    fuseki:dataset                     :delta_dataset ;
 .
 
+
 :delta_dataset
-    a              delta:DeltaDataset ;
-    delta:changes  "http://delta:1066" ;
-    delta:patchlog "ds";
-    delta:zone     "/fuseki/delta-zones";
-    delta:storage  "external";
-    delta:dataset  :text_dataset ;
+    rdf:type                           delta:DeltaDataset ;
+    delta:changes                      "http://delta:1066" ;
+    delta:patchlog                     "ds";
+    delta:zone                         "/fuseki/delta-zones";
+    delta:storage                      "external";
+    delta:dataset                      :text_dataset ;
+.
+
+:geosparql_dataset
+    rdf:type                           geosparql:geosparqlDataset ;
+    geosparql:spatialIndexFile         "/fuseki/databases/ds/spatial.index" ;
+    geosparql:inference                false ;
+    geosparql:queryRewrite             true ;
+    geosparql:applyDefaultGeometry     true ;
+    geosparql:indexEnabled             true ;
+    geosparql:validateGeometryLiterals false ;
+    geosparql:srsUri                   <http://www.opengis.net/def/crs/OGC/1.3/CRS84> ;
+    geosparql:indexSizes               "-1,-1,-1" ;
+    geosparql:indexExpires             "5000,5000,5000" ;
+    geosparql:dataset                  :tdb_dataset_readwrite ;
 .
 
 :text_dataset
-    a             text:TextDataset ;
-    text:dataset  :tdb_dataset_readwrite ;
-    text:index    :indexLucene ;
+    rdf:type                            text:TextDataset ;
+    text:dataset                       :geosparql_dataset ;
+    text:index                         :lucene_index ;
 .
 
 :tdb_dataset_readwrite
-    a                       tdb2:DatasetTDB2;
-    tdb2:location           "/fuseki/databases/ds" ;
-    tdb2:unionDefaultGraph  true ;
+    rdf:type                           tdb2:DatasetTDB2 ;
+    tdb2:unionDefaultGraph             true ;
+    tdb2:location                      "/fuseki/databases/ds" ;
+    ja:context [
+      ja:cxtName "arq:queryTimeout" ;
+      ja:cxtValue "5000,60000"
+    ] ;
 .
 
-:indexLucene
-    a                 text:TextIndexLucene ;
-    text:directory    "/fuseki/databases/ds" ;
-    text:entityMap    :entMap ;
-    text:analyzer     [ a text:StandardAnalyzer ] ;
-    text:storeValues  true ;
+:lucene_index
+    rdf:type                           text:TextIndexLucene ;
+    text:directory                     <file:/fuseki/databases/ds/text_index> ;
+    text:entityMap                     :entity_map ;
+    text:storeValues                   true ;
+    text:analyzer [
+        rdf:type text:StandardAnalyzer
+    ] ;
+    text:queryAnalyzer [ a text:StandardAnalyzer ] ;
+    text:queryParser text:QueryParser ;
+    text:multilingualSupport           true ;
+    text:propLists (
+        [
+            text:propListProp ex:allprops ;
+            text:props (
+                rdfs:label
+                sdo:name
+                sdo:description
+            ) ;
+        ]
+    ) ;
 .
 
-:entMap
-    a text:EntityMap ;
-    text:defaultField  "name" ;
-    text:entityField   "uri" ;
-    text:uidField      "uid" ;
-    text:langField     "lang" ;
-    text:graphField    "graph" ;
-    text:map ([ text:field "name" ; text:predicate sdo:name ])
+:entity_map
+    rdf:type                           text:EntityMap ;
+    text:defaultField                  "rdfs-label" ;
+    text:entityField                   "uri" ;
+    text:uidField                      "uid" ;
+    text:langField                     "lang" ;
+    text:graphField                    "graph" ;
+    text:map (
+        [ text:field "rdfs-label" ;      text:predicate rdfs:label ]
+        [ text:field "sdo-name" ;        text:predicate sdo:name ]
+        [ text:field "sdo-description" ; text:predicate sdo:description ]
+    ) ;
 .

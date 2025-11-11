@@ -1,0 +1,27 @@
+diff --git a/rdf-delta-fuseki-server/pom.xml b/rdf-delta-fuseki-server/pom.xml
+index ddbd0a15..ec5bf83e 100644
+--- a/rdf-delta-fuseki-server/pom.xml
++++ b/rdf-delta-fuseki-server/pom.xml
+@@ -50,7 +50,7 @@
+ 
+     <dependency>
+       <groupId>org.apache.jena</groupId>
+-      <artifactId>jena-fuseki-main</artifactId>
++      <artifactId>jena-fuseki-server</artifactId>
+     </dependency>
+ 
+     <dependency>
+@@ -64,6 +64,13 @@
+       <artifactId>jena-text</artifactId>
+     </dependency>
+ 
++
++    <dependency>
++      <groupId>org.apache.jena</groupId>
++      <artifactId>jena-geosparql</artifactId>
++      <version>5.4.0</version>
++    </dependency>
++
+   </dependencies>
+ 
+   <build>
