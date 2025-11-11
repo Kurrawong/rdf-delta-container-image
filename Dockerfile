@@ -1,15 +1,5 @@
-# latest as at 2025-11-06 (missing rocksdbjni jar)
-# ARG DELTA_GIT_HASH=f352db5368cd1d37e26f7c3bd913e02fbd19b86f
-#ARG DELTA_VERSION=2.0.0-SNAPSHOT
-#ARG DELTA_GIT_HASH=3f8efaaf682ea14bc738dd610202956be4970716
-
-#latest min-delta commit 2025-11-06
-#ARG DELTA_GIT_HASH=376007ef5bb4662292509eb07c135a3d27b342ae
-#ARG DELTA_VERSION=1.1.3-SNAPSHOT
-
-#last commit before 1.1.3
-ARG DELTA_GIT_HASH=bb2f9d2f5ea61fed37d5621ec3147dd01e9b0d5b
-ARG DELTA_VERSION=2.0.0-SNAPSHOT
+ARG DELTA_GIT_HASH=f352db5368cd1d37e26f7c3bd913e02fbd19b86f
+ARG DELTA_VERSION=1.1.3-SNAPSHOT
 
 #
 # Builder stage
@@ -36,6 +26,11 @@ COPY patches/enable-geosparql.diff .
 WORKDIR /tmp/rdf-delta/rdf-delta-fuseki-server
 RUN patch --verbose --ignore-whitespace pom.xml < ../enable-geosparql.diff
 WORKDIR /tmp/rdf-delta
+
+# Apply a patch for issue in rocksdb 10.4.2 (explicitly requires native binaries for linux64-musl)
+WORKDIR /tmp/rdf-delta
+COPY patches/rocksdb.diff .
+RUN patch -p1 < rocksdb.diff
 
 # RUN mvn -Drat.skip=true -B verify --file pom.xml
 # Skip tests and skip license check, just package up the code
