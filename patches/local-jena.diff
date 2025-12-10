@@ -8,7 +8,7 @@ index 3538a84..cc2e4ad 100644
  
 -    <ver.jena>5.6.0</ver.jena>
 +    <ver.jena>6.0.0-SNAPSHOT</ver.jena>
-     <ver.jetty>12.1.3</ver.jetty>
+     <ver.jetty>12.1.4</ver.jetty>
  
      <!-- Ensure we get a version compatible with Jena. -->
 diff --git a/rdf-delta-server-http/src/main/java/org/seaborne/delta/server/http/PatchLogServer.java b/rdf-delta-server-http/src/main/java/org/seaborne/delta/server/http/PatchLogServer.java
