@@ -37,7 +37,7 @@ LIMIT 5
 text_query = """
 PREFIX text: <http://jena.apache.org/text#>
 
-SELECT *
+SELECT ?uri
 WHERE {
     ?uri text:query "queensland" .
 }

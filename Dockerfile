@@ -1,24 +1,37 @@
 ARG DELTA_GIT_HASH=f352db5368cd1d37e26f7c3bd913e02fbd19b86f
 ARG DELTA_VERSION=1.1.3-SNAPSHOT
+ARG JENA_GIT_HASH=f6aa0ea7be9a59e525875b7a89e6c72fff201875
 
 #
 # Builder stage
 #
 FROM maven:3.9.11-amazoncorretto-25 AS builder
 
+ARG JENA_GIT_HASH
 ARG DELTA_GIT_HASH
 
-WORKDIR /tmp/rdf-delta
 
 RUN yum install -y git unzip patch
 
+# checkout the jena repo
+WORKDIR /tmp/jena
 RUN <<EOF
-  # checkout the rdf-delta repo
-  git init && \
-      git remote add origin https://github.com/afs/rdf-delta.git && \
-      git fetch --depth 1 origin ${DELTA_GIT_HASH}:main && \
-      git checkout main && \
-      git reset --hard ${DELTA_GIT_HASH}
+  git init
+  git remote add origin https://github.com/apache/jena.git
+  git fetch --depth 1 origin ${JENA_GIT_HASH}
+  git checkout ${JENA_GIT_HASH}
+EOF
+
+# build jena at the designated commit
+RUN mvn clean install -Drat.skip=true -DskipTests
+
+# checkout the rdf-delta repo
+WORKDIR /tmp/rdf-delta
+RUN <<EOF
+  git init
+  git remote add origin https://github.com/afs/rdf-delta.git
+  git fetch --depth 1 origin ${DELTA_GIT_HASH}
+  git checkout ${DELTA_GIT_HASH}
 EOF
 
 # Apply a dependency patch for GeoSPARQL support
@@ -32,11 +45,16 @@ WORKDIR /tmp/rdf-delta
 COPY patches/rocksdb.diff .
 RUN patch -p1 < rocksdb.diff
 
-# RUN mvn -Drat.skip=true -B verify --file pom.xml
+# Apply a patch to use the local version of jena we just built
+WORKDIR /tmp/rdf-delta
+COPY patches/local-jena.diff .
+RUN patch -p1 < local-jena.diff
+
+# Build RDF Delta
 # Skip tests and skip license check, just package up the code
 RUN mvn -Drat.skip=true -B package -DskipTests --file pom.xml
 
-  # unzip the distribution (has the cli commands in it)
+# Unzip the distribution (has the cli commands in it)
 RUN unzip /tmp/rdf-delta/rdf-delta-dist/target/*.zip
 
 #
