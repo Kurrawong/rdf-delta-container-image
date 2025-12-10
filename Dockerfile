@@ -60,7 +60,7 @@ RUN unzip /tmp/rdf-delta/rdf-delta-dist/target/*.zip
 #
 # Final stage
 #
-FROM amazoncorretto:21-alpine
+FROM amazoncorretto:25-alpine
 
 ARG DELTA_VERSION
 
