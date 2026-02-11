@@ -1,17 +1,34 @@
+import json
+import subprocess
+
 import httpx
 import rdflib
 
 
+def get_docker_gateway() -> str:
+    cmd = "docker inspect rdf-delta-container-image-delta-1"
+    inspect_str = subprocess.check_output(cmd.split()).decode().strip()
+    inpect_json = json.loads(inspect_str)
+    gateway = inpect_json[0]["NetworkSettings"]["Networks"][
+        "rdf-delta-container-image_delta"
+    ]["Gateway"]
+    return str(gateway)
+
+
 def main():
     print("getting last patch id")
-    response = httpx.post(
-        "http://172.19.0.1:1066/$/rpc",
+    gateway = get_docker_gateway()
+    delta_client = httpx.Client(base_url=f"http://{gateway}:1066")
+    fuseki1_client = httpx.Client(base_url=f"http://{gateway}:3030")
+    fuseki2_client = httpx.Client(base_url=f"http://{gateway}:3031")
+    response = delta_client.post(
+        "/$/rpc",
         json={"opid": "", "operation": "describe_datasource", "arg": {"name": "ds"}},
     )
     response.raise_for_status()
     id = response.json()["id"]
-    response = httpx.post(
-        "http://172.19.0.1:1066/$/rpc",
+    response = delta_client.post(
+        "/$/rpc",
         json={"opid": "", "operation": "describe_log", "arg": {"datasource": id}},
     )
     header_prev = response.json()["latest"] or None
@@ -27,9 +44,7 @@ def main():
 
     print("submitting patch log to rdf delta server")
     headers = {"Content-Type": "application/rdf-patch", "Accept": "application/json"}
-    response = httpx.post(
-        url="http://172.19.0.1:1066/ds", headers=headers, content=patch
-    )
+    response = delta_client.post(url="/ds", headers=headers, content=patch)
     response.raise_for_status()
     json = response.json()
     print(json)
@@ -37,7 +52,7 @@ def main():
 
     print("checking the patch log")
     params = {"version": json["version"]}
-    response = httpx.get("http://172.19.0.1:1066/ds", params=params)
+    response = delta_client.get("/ds", params=params)
     response.raise_for_status()
     print(response.content.decode())
     print("ok")
@@ -46,13 +61,13 @@ def main():
     headers = {"Accept": "text/csv"}
 
     print("checking fuseki1")
-    response = httpx.get("http://172.19.0.1:3030/ds", params=params, headers=headers)
+    response = fuseki1_client.get("/ds", params=params, headers=headers)
     response.raise_for_status()
     print(response.content.decode())
     print("ok")
 
     print("checking fuseki2")
-    response = httpx.get("http://172.19.0.1:3031/ds", params=params, headers=headers)
+    response = fuseki2_client.get("/ds", params=params, headers=headers)
     response.raise_for_status()
     print(response.content.decode())
     print("ok")
