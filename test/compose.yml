@@ -1,7 +1,7 @@
 services:
 
   delta:
-    image: rdf-delta-container-image-delta:latest
+    image: rdf-delta:latest
     networks:
       - delta
     ports:
@@ -13,7 +13,7 @@ services:
       retries: 3
 
   fusekia:
-    image: rdf-delta-container-image-delta:latest
+    image: rdf-delta:latest
     ports:
       - 3030:3030
     volumes:
@@ -27,7 +27,7 @@ services:
         condition: service_healthy
 
   fusekib:
-    image: rdf-delta-container-image-delta:latest
+    image: rdf-delta:latest
     ports:
       - 3031:3030
     volumes:
