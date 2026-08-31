@@ -1,0 +1,145 @@
+Cannot start using the following config
+
+```turtle
+@prefix :          <urn:gswa:config#> .
+@prefix delta:     <http://jena.apache.org/rdf-delta#> .
+@prefix fuseki:    <http://jena.apache.org/fuseki#> .
+@prefix geosparql: <http://jena.apache.org/geosparql#> .
+@prefix idx:       <urn:jena:lucene:index#> .
+@prefix ja:        <http://jena.hpl.hp.com/2005/11/Assembler#> .
+@prefix tdb2:      <http://jena.apache.org/2016/tdb#> .
+@prefix text:      <http://jena.apache.org/text#> .
+@prefix field:     <urn:jena:lucene:field#> .
+...
+
+:service
+    rdf:type                           fuseki:Service ;
+    fuseki:name                        "myds" ;
+    fuseki:serviceQuery                "sparql" ;
+    fuseki:serviceQuery                "query" ;
+    fuseki:serviceUpdate               "update" ;
+    fuseki:serviceUpload               "upload" ;
+    fuseki:serviceReadWriteGraphStore  "data" ;
+    fuseki:serviceReadGraphStore       "get" ;
+    fuseki:dataset                     :delta_dataset ;
+.	
+
+:delta_dataset
+    rdf:type                           delta:DeltaDataset ;
+    delta:changes                      "http://delta:1066" ;
+    delta:patchlog                     "myds";
+    delta:zone                         "/fuseki/delta-zones";
+    delta:storage                      "external";
+    delta:dataset                      :geosparql_dataset ;
+.
+	
+:geosparql_dataset
+    rdf:type                            geosparql:geosparqlDataset ;
+    geosparql:applyDefaultGeometry      false ;
+    geosparql:indexEnabled              true ;
+    geosparql:indexExpires              "5000,5000,5000" ;
+    geosparql:indexSizes                "-1,-1,-1" ;
+    geosparql:inference                 false ;
+    geosparql:queryRewrite              true ;
+    geosparql:spatialIndexFile          "/fuseki/databases/myds/spatial.index" ;
+    geosparql:srsUri                    <http://www.opengis.net/def/crs/OGC/1.3/CRS84> ;
+    geosparql:validateGeometryLiterals  false ;
+    geosparql:dataset                   :text_dataset ;
+    fuseki:dataset                     :text_dataset ;
+.
+
+:text_dataset
+    rdf:type                           text:TextDataset ;
+    text:dataset                       :tdb_dataset_readwrite ;
+    text:indexes                       ( :shacl_index ) ;
+.
+
+:tdb_dataset_readwrite
+    rdf:type                           tdb2:DatasetTDB2 ;
+    tdb2:unionDefaultGraph             true ;
+    ja:context [
+      ja:cxtName "arq:queryTimeout" ;
+      ja:cxtValue "30000,60000"
+    ] ;
+    tdb2:location                      "/fuseki/databases/myds" ;
+.
+
+
+# ===========================================================
+# SHACL entity-per-document index (luc:query)
+# ===========================================================
+:shacl_index
+    rdf:type          text:TextIndexShacl ;
+    text:indexId      "shacl" ;
+    text:directory    "/fuseki/databases/myds/lucene" ;
+    text:shapes       (
+        :ReportShape
+        :BoreholeShape
+        :BoreShape
+        :DistributionShape
+        ...
+.
+```
+
+error trace
+
+```
+fuseki-1  | Exception in thread "main" org.apache.jena.assembler.exceptions.AssemblerException: caught: Cannot invoke "org.apache.jena.rdf.model.Resource.getModel()" because "root" is null
+fuseki-1  |   doing:
+fuseki-1  |     root: urn:gswa:config#text_dataset with type: http://jena.apache.org/text#TextDataset assembler class: class org.apache.jena.query.text.assembler.TextDatasetAssembler
+fuseki-1  |     root: urn:gswa:config#geosparql_dataset with type: http://jena.apache.org/geosparql#geosparqlDataset assembler class: class org.apache.jena.geosparql.assembler.GeoAssembler
+fuseki-1  |     root: urn:gswa:config#delta_dataset with type: http://jena.apache.org/rdf-delta#DeltaDataset assembler class: class org.seaborne.delta.client.assembler.DeltaAssembler
+fuseki-1  |
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$PlainAssemblerGroup.openBySpecificType(AssemblerGroup.java:171)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$PlainAssemblerGroup.open(AssemblerGroup.java:150)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$ExpandingAssemblerGroup.open(AssemblerGroup.java:99)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerBase.open(AssemblerBase.java:42)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerBase.open(AssemblerBase.java:38)
+fuseki-1  | 	at org.apache.jena.sparql.core.assembler.DatasetAssembler.createBaseDataset(DatasetAssembler.java:75)
+fuseki-1  | 	at org.apache.jena.geosparql.assembler.GeoAssembler.createDataset(GeoAssembler.java:68)
+fuseki-1  | 	at org.apache.jena.sparql.core.assembler.DatasetAssembler.createNamedDataset(DatasetAssembler.java:58)
+fuseki-1  | 	at org.apache.jena.sparql.core.assembler.DatasetAssembler.open(DatasetAssembler.java:45)
+fuseki-1  | 	at org.apache.jena.sparql.core.assembler.DatasetAssembler.open(DatasetAssembler.java:36)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$PlainAssemblerGroup.openBySpecificType(AssemblerGroup.java:163)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$PlainAssemblerGroup.open(AssemblerGroup.java:150)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$ExpandingAssemblerGroup.open(AssemblerGroup.java:99)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerBase.open(AssemblerBase.java:42)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerBase.open(AssemblerBase.java:38)
+fuseki-1  | 	at org.seaborne.delta.client.assembler.DeltaAssembler.open(DeltaAssembler.java:88)
+fuseki-1  | 	at org.seaborne.delta.client.assembler.DeltaAssembler.open(DeltaAssembler.java:52)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$PlainAssemblerGroup.openBySpecificType(AssemblerGroup.java:163)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$PlainAssemblerGroup.open(AssemblerGroup.java:150)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$ExpandingAssemblerGroup.open(AssemblerGroup.java:99)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerBase.open(AssemblerBase.java:42)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerBase.open(AssemblerBase.java:38)
+fuseki-1  | 	at org.apache.jena.fuseki.build.FusekiConfig.getDataset(FusekiConfig.java:690)
+fuseki-1  | 	at org.apache.jena.fuseki.build.FusekiConfig.buildDataService(FusekiConfig.java:445)
+fuseki-1  | 	at org.apache.jena.fuseki.build.FusekiConfig.buildDataAccessPoint(FusekiConfig.java:433)
+fuseki-1  | 	at org.apache.jena.fuseki.build.FusekiConfig.servicesAndDatasets$(FusekiConfig.java:334)
+fuseki-1  | 	at org.apache.jena.fuseki.build.FusekiConfig.processServerConfiguration(FusekiConfig.java:199)
+fuseki-1  | 	at org.apache.jena.fuseki.main.FusekiServer$Builder.parseConfiguration(FusekiServer.java:980)
+fuseki-1  | 	at org.apache.jena.fuseki.main.FusekiServer$Builder.parseConfig(FusekiServer.java:946)
+fuseki-1  | 	at org.apache.jena.fuseki.main.runner.FusekiArgs.applyServerArgs(FusekiArgs.java:628)
+fuseki-1  | 	at org.apache.jena.fuseki.main.runner.FusekiArgs.applySetup(FusekiArgs.java:579)
+fuseki-1  | 	at org.apache.jena.fuseki.main.runner.FusekiArgs.applyArgs(FusekiArgs.java:88)
+fuseki-1  | 	at org.apache.jena.fuseki.main.FusekiMain.builder(FusekiMain.java:104)
+fuseki-1  | 	at org.apache.jena.fuseki.main.runner.FusekiRunner.builder(FusekiRunner.java:220)
+fuseki-1  | 	at org.apache.jena.fuseki.main.runner.FusekiRunner$RunnerMods.builder(FusekiRunner.java:232)
+fuseki-1  | 	at org.apache.jena.fuseki.main.runner.AbstractRunner.construct(AbstractRunner.java:113)
+fuseki-1  | 	at org.apache.jena.fuseki.main.runner.AbstractRunner.process(AbstractRunner.java:78)
+fuseki-1  | 	at org.apache.jena.fuseki.main.runner.AbstractRunner.exec(AbstractRunner.java:46)
+fuseki-1  | 	at org.apache.jena.fuseki.main.runner.FusekiRunner.execMain(FusekiRunner.java:89)
+fuseki-1  | 	at org.apache.jena.fuseki.main.cmds.RunFuseki.run(RunFuseki.java:44)
+fuseki-1  | 	at org.apache.jena.fuseki.main.cmds.FusekiMainCmd.main(FusekiMainCmd.java:41)
+fuseki-1  | 	at org.seaborne.delta.fuseki.cmd.DeltaFusekiServerCmd.main(DeltaFusekiServerCmd.java:39)
+fuseki-1  | Caused by: java.lang.NullPointerException: Cannot invoke "org.apache.jena.rdf.model.Resource.getModel()" because "root" is null
+fuseki-1  | 	at org.apache.jena.assembler.AssemblerHelp.withFullModel(AssemblerHelp.java:59)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$ExpandingAssemblerGroup.open(AssemblerGroup.java:96)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerBase.open(AssemblerBase.java:42)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerBase.open(AssemblerBase.java:38)
+fuseki-1  | 	at org.apache.jena.query.text.assembler.TextDatasetAssembler.open(TextDatasetAssembler.java:72)
+fuseki-1  | 	at org.apache.jena.query.text.assembler.TextDatasetAssembler.open(TextDatasetAssembler.java:46)
+fuseki-1  | 	at org.apache.jena.assembler.assemblers.AssemblerGroup$PlainAssemblerGroup.openBySpecificType(AssemblerGroup.java:163)
+fuseki-1  | 	... 41 more
+fuseki-1 exited with code 1
+```
