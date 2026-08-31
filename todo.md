@@ -6,7 +6,7 @@
 - [x] run locally using prebuilt (seeded) tdb2 dataset.
     debugging ... done
 - [x] run locally with 2 x fluceneDelta & delta server.
-- [ ] scan image
+- [x] scan image
 - [ ] put changes on maintainable branch.
 - [ ] build and push images to shared dev.
 - [ ] redeploy rdf delta vm to shared dev.
