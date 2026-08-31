@@ -1,12 +1,14 @@
-ARG DELTA_GIT_HASH=61781e48a1d47942ad6b11b5207af0b197645200
+ARG DELTA_GIT_HASH=0a44c60368c523361fd2ba1d929023e5f1987ee0
 ARG DELTA_VERSION=1.1.3-SNAPSHOT
-ARG JENA_GIT_HASH=adf2bf8880b0c0fa9a9ffdfca932434eba6323fc
+ARG JENA_REPO=https://github.com/kurrawong/jena.git
+ARG JENA_GIT_HASH=536b979b4fb1a852999588e71433bc838b14fa7e
 
 #
 # Builder stage
 #
 FROM maven:3.9.11-amazoncorretto-25 AS builder
 
+ARG JENA_REPO
 ARG JENA_GIT_HASH
 ARG DELTA_GIT_HASH
 
@@ -17,7 +19,7 @@ RUN yum install -y git unzip patch
 WORKDIR /tmp/jena
 RUN <<EOF
   git init
-  git remote add origin https://github.com/apache/jena.git
+  git remote add origin ${JENA_REPO}
   git fetch --depth 1 origin ${JENA_GIT_HASH}
   git checkout ${JENA_GIT_HASH}
 EOF
@@ -39,16 +41,6 @@ COPY patches/enable-geosparql.diff .
 WORKDIR /tmp/rdf-delta/rdf-delta-fuseki-server
 RUN patch --verbose --ignore-whitespace pom.xml < ../enable-geosparql.diff
 WORKDIR /tmp/rdf-delta
-
-# Apply a patch for issue in rocksdb 10.4.2 (explicitly requires native binaries for linux64-musl)
-WORKDIR /tmp/rdf-delta
-COPY patches/rocksdb.diff .
-RUN patch -p1 < rocksdb.diff
-
-# Apply a patch to use the local version of jena we just built
-WORKDIR /tmp/rdf-delta
-COPY patches/local-jena.diff .
-RUN patch -p1 < local-jena.diff
 
 # Build RDF Delta
 # Skip tests and skip license check, just package up the code
