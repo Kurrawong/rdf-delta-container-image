@@ -1,5 +1,26 @@
-Cannot start using the following config
+issue:
 
+Cannot start using the below config (truncated)
+
+chiefly, because of the text index. it starts if you skip the  text index and link from geosparql to tdb2
+
+to narrow:
+
+need to test without :shacl_index and just try standard lucene text index.
+
+
+suspicions:
+
+I suspect the issue may require a jena fork code change to resolve.
+
+Looks like
+`jena-text/src/main/java/org/apache/jena/query/text/assembler/EntityDefinitionAssembler.java`
+used by the original jena text index assembler has a getModel() method, but
+`jena-text/src/main/java/org/apache/jena/query/text/assembler/ShaclTextIndexAssembler.java`
+used by the new SHACL text index does not have the required getModel() method.
+
+
+config.ttl
 ```turtle
 @prefix :          <urn:gswa:config#> .
 @prefix delta:     <http://jena.apache.org/rdf-delta#> .
@@ -82,7 +103,6 @@ Cannot start using the following config
 ```
 
 error trace
-
 ```
 fuseki-1  | Exception in thread "main" org.apache.jena.assembler.exceptions.AssemblerException: caught: Cannot invoke "org.apache.jena.rdf.model.Resource.getModel()" because "root" is null
 fuseki-1  |   doing:

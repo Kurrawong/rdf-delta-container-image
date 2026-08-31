@@ -1,0 +1,24 @@
+prefix schema: <https://schema.org/>
+prefix geo: <http://www.opengis.net/ont/geosparql#>
+
+delete {
+  graph ?g {
+    ?s geo:hasGeometry ?wkt .
+  }
+}
+insert {
+  graph ?g {
+    ?s geo:hasGeometry [
+      ?a geo:Geometry ;
+      geo:asWKT ?wktTyped
+    ] .
+  }
+}
+where {
+  values ?g { <https://linked.data.gov.au/dataset/gswa/MAGIX/survey> }
+  graph ?g {
+    ?s geo:hasGeometry ?wkt .
+    BIND(STR(?wkt) AS ?wktStr)
+    BIND(STRDT(?wktStr, geo:wktLiteral) AS ?wktTyped)
+  }
+}
