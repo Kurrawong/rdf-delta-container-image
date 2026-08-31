@@ -12,13 +12,27 @@ services:
       timeout: 0.5s
       retries: 3
 
-  fuseki:
+  fusekia:
     image: rdf-delta-container-image-delta:latest
     ports:
       - 3030:3030
     volumes:
       - ./config.ttl:/opt/rdf-delta/config.ttl
-      - ./fuseki/databases:/fuseki/databases
+      - ./fusekia/databases:/fuseki/databases
+    networks:
+      - delta
+    command: ["/bin/bash", "-c", "/opt/rdf-delta/fuseki-entrypoint.sh"]
+    depends_on:
+      delta:
+        condition: service_healthy
+
+  fusekib:
+    image: rdf-delta-container-image-delta:latest
+    ports:
+      - 3031:3030
+    volumes:
+      - ./config.ttl:/opt/rdf-delta/config.ttl
+      - ./fusekib/databases:/fuseki/databases
     networks:
       - delta
     command: ["/bin/bash", "-c", "/opt/rdf-delta/fuseki-entrypoint.sh"]
