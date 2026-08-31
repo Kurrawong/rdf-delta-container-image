@@ -1,5 +1,11 @@
 # RDF Delta Container Image
 
+## JENAFORK BRANCH NOTES
+
+This Branch moves rdf-delta capabilities on top of the jena fork maintained at
+<https://github.com/kurrawong/jena>. This fork adds a SHACL based text index with
+extended Lucene integration support.
+
 ## Usage
 
 This repository builds and publishes the `rdf-delta` container image that has
