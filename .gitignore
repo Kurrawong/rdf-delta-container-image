@@ -164,7 +164,3 @@ cython_debug/
 
 fuseki_data
 fuseki2_data
-
-test/MAGIX
-test/fusekia
-test/fusekib
