@@ -19,7 +19,12 @@ for more information.
 Pre-built container images are available at
 https://github.com/Kurrawong/rdf-delta-container-image/pkgs/container/rdf-delta.
 
-See the [compose.yml](compose.yml) for general container setup.
+See the [compose.yaml](compose.yaml) for general container setup.
+
+The Fuseki server reads its configuration from `/config.ttl`. The image includes
+[config.ttl](config.ttl) at that path; mount a custom configuration with
+`-v ./config.ttl:/config.ttl:ro` to override it. Compose mounts the local
+`config.ttl` read-only into both Fuseki services.
 
 ## Quickstart
 

@@ -98,7 +98,7 @@ EOF
 
 WORKDIR /opt/rdf-delta
 
-COPY config.ttl /opt/rdf-delta/config.ttl
+COPY config.ttl /config.ttl
 COPY entrypoint.sh .
 COPY fuseki-entrypoint.sh .
 

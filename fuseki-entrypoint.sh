@@ -7,4 +7,4 @@ exec \
   --add-modules jdk.incubator.vector \
   -cp "/opt/rdf-delta/rdf-delta-fuseki-server.jar" \
   org.seaborne.delta.fuseki.cmd.DeltaFusekiServerCmd \
-  --conf config.ttl
+  --conf /config.ttl

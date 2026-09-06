@@ -17,6 +17,8 @@ services:
       context: .
     ports:
       - 3030:3030
+    volumes:
+      - ./config.ttl:/config.ttl:ro
     networks:
       - delta
     command: ["/bin/bash", "-c", "/opt/rdf-delta/fuseki-entrypoint.sh"]
@@ -29,6 +31,8 @@ services:
       context: .
     ports:
       - 3031:3030
+    volumes:
+      - ./config.ttl:/config.ttl:ro
     networks:
       - delta
     command: ["/bin/bash", "-c", "/opt/rdf-delta/fuseki-entrypoint.sh"]
