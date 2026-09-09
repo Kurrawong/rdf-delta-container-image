@@ -26,3 +26,7 @@ tasks:
   down:
     desc: down the docker services
     cmd: docker compose down
+
+  build:
+    desc: Build the docker image
+    cmd: docker build . -t rdf-delta:dev
