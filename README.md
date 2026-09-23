@@ -117,6 +117,41 @@ curl -s -X POST http://172.19.0.1:1066/ds \
   -H "Content-Type: application/rdf-patch"
 ```
 
+## Releasing
+
+The Dockerfile pins the upstream sources it compiles: `ARG JENA_GIT_HASH`
+against the repository named in `ARG JENA_REPO`, and `ARG DELTA_GIT_HASH`
+against `afs/rdf-delta`. Moving either one is a release, because the built
+image is the only place the change is visible.
+
+The [Release workflow](.github/workflows/release.yml) builds
+`ghcr.io/kurrawong/rdf-delta` for linux/amd64 and linux/arm64 when a GitHub
+release is published. Pushing to a branch does not build anything.
+
+```
+task release -- --jena main --suffix jenafork
+```
+
+`--jena` and `--delta` each take a full SHA, a short SHA, a tag or a branch,
+and the script resolves it against the upstream repository before writing it.
+Pass only the flag you want to move; at least one is required.
+
+The version defaults to the highest plain `X.Y.Z` tag with its patch
+incremented. `--suffix jenafork` appends a prerelease suffix, which
+`docker/metadata-action` excludes from the floating `{{major}}` and
+`{{major}}.{{minor}}` tags, so a variant lineage cannot claim them. `--version`
+sets the version outright instead.
+
+The script refuses to run when the resolved commit is already pinned, when the
+Dockerfile has uncommitted changes, or when you have unpushed commits. Add
+`--dry-run` to resolve the SHAs and print the version without changing
+anything. Otherwise it commits the Dockerfile, pushes an annotated tag, creates
+the release, and waits for the workflow to finish.
+
+Distributing the published image to any downstream registry is out of scope
+here. Keep those steps in local scripts so the repository stays independent of
+any particular deployment.
+
 ## Rebuilding cached images
 
 To rebuild the images from scratch, you may need to delete any cached images (e.g., if the enable-geosparql.diff patch has changed, docker may not pick this up):

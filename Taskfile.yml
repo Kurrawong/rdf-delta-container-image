@@ -30,3 +30,7 @@ tasks:
   build:
     desc: Build the docker image
     cmd: docker build . -t rdf-delta:dev
+
+  release:
+    desc: 'Pin new upstream commits, tag, and publish a release. Usage: task release -- --jena <ref> [--suffix jenafork]'
+    cmd: ./scripts/release.sh {{.CLI_ARGS}}
