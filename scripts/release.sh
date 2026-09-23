@@ -55,7 +55,12 @@ while [ $# -gt 0 ]; do
     esac
 done
 
-[ -n "$JENA_REF" ] || [ -n "$DELTA_REF" ] || die "pass at least one of --jena <ref> or --delta <ref>"
+# With no ref, this re-releases the commits already pinned. That is the case
+# when something other than a pin changed - the workflow, the Dockerfile - and
+# the only way to see the effect is to build it.
+if [ -z "$JENA_REF" ] && [ -z "$DELTA_REF" ] && [ -z "$VERSION" ] && [ -z "$SUFFIX" ]; then
+    die "pass --jena/--delta to bump a pin, or --version/--suffix to re-release the current pins"
+fi
 [ -z "$VERSION" ] || [ -z "$SUFFIX" ] || die "--suffix applies to the derived version; drop it when passing --version"
 
 command -v gh >/dev/null || die "gh is not installed"
@@ -96,12 +101,15 @@ plan() {
 plan JENA_GIT_HASH  "$JENA_REPO"  "$JENA_REF"
 plan DELTA_GIT_HASH "$DELTA_REPO" "$DELTA_REF"
 
-[ "${#CHANGES[@]}" -gt 0 ] || die "nothing to update; the Dockerfile already pins those commits"
+if [ "${#CHANGES[@]}" -eq 0 ] && { [ -n "$JENA_REF" ] || [ -n "$DELTA_REF" ]; }; then
+    die "nothing to update; the Dockerfile already pins those commits"
+fi
 
 if [ -z "$VERSION" ]; then
-    LATEST="$(git tag --list --sort=-v:refname | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | head -1)"
+    LATEST="$(git tag --list --sort=-v:refname |
+        grep -E '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$' | head -1)"
     [ -n "$LATEST" ] || die "no existing semver tag found; pass --version"
-    IFS=. read -r MAJOR MINOR PATCH <<<"$LATEST"
+    IFS=. read -r MAJOR MINOR PATCH <<<"${LATEST%%-*}"
     VERSION="${MAJOR}.${MINOR}.$((PATCH + 1))"
     # A suffix marks a release built from a variant lineage, e.g. jenafork.
     # docker/metadata-action treats it as a prerelease, so it will not move the
@@ -109,7 +117,7 @@ if [ -z "$VERSION" ]; then
     if [ -n "$SUFFIX" ]; then
         VERSION="${VERSION}-${SUFFIX}"
     fi
-    echo "latest plain tag is ${LATEST}, releasing ${VERSION}"
+    echo "latest tag is ${LATEST}, releasing ${VERSION}"
 fi
 
 [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]] ||
@@ -127,14 +135,22 @@ fi
 [ "$(git rev-list --count '@{u}..HEAD')" = "0" ] || die "you have unpushed commits; push or reset them first"
 
 BODY=""
-for CHANGE in "${CHANGES[@]}"; do
-    IFS='|' read -r ARG OLD NEW REPO <<<"$CHANGE"
-    sed -i "s|^ARG ${ARG}=.*|ARG ${ARG}=${NEW}|" "$DOCKERFILE"
-    BODY+="- ${REPO}: \`${OLD}\` -> [\`${NEW:0:12}\`](https://github.com/${REPO}/commit/${NEW})"$'\n'
-done
-
-git add "$DOCKERFILE"
-git commit -q -m "build: bump upstream commits for ${VERSION}" -m "$BODY"
+if [ "${#CHANGES[@]}" -gt 0 ]; then
+    for CHANGE in "${CHANGES[@]}"; do
+        IFS='|' read -r ARG OLD NEW REPO <<<"$CHANGE"
+        sed -i "s|^ARG ${ARG}=.*|ARG ${ARG}=${NEW}|" "$DOCKERFILE"
+        BODY+="- ${REPO}: \`${OLD}\` -> [\`${NEW:0:12}\`](https://github.com/${REPO}/commit/${NEW})"$'\n'
+    done
+    git add "$DOCKERFILE"
+    git commit -q -m "build: bump upstream commits for ${VERSION}" -m "$BODY"
+else
+    # No pin moved, so there is nothing to commit; tag the current commit and
+    # record what it builds from.
+    echo "no pin changed; re-releasing $(git rev-parse --short HEAD) as ${VERSION}"
+    BODY="Rebuild of \`$(git rev-parse --short HEAD)\` with no upstream pin change."$'\n'$'\n'
+    BODY+="- ${JENA_REPO}: \`$(current_arg JENA_GIT_HASH)\`"$'\n'
+    BODY+="- ${DELTA_REPO}: \`$(current_arg DELTA_GIT_HASH)\`"$'\n'
+fi
 git tag -a "$VERSION" -m "$VERSION"
 git push -q origin HEAD
 git push -q origin "refs/tags/${VERSION}"
