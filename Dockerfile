@@ -93,6 +93,8 @@ ARG DELTA_VERSION
 
 RUN <<EOF
   apk update
+  # The base image lags Alpine's security updates; take them at build time.
+  apk upgrade --no-cache
   apk add --no-cache bash curl libstdc++
 EOF
 
